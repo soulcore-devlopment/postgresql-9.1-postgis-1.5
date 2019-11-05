@@ -5,7 +5,7 @@
 
 set -e
 
-
+#su postgres;
 
 #if [ `$(psql -v ON_ERROR_STOP=1 --username $POSTGRES_USER --dbname $POSTGRES_DB -c "SELECT 1 as "exist" from pg_database WHERE datname = 'template_postgis';" | grep -q 1) != 1` ]; then
 
@@ -38,9 +38,17 @@ psql -v ON_ERROR_STOP=1 --username $POSTGRES_USER --dbname $POSTGRES_DB <<-'EOSQ
     UPDATE pg_database SET datistemplate=true WHERE datname='template_postgis';
 EOSQL
 
+su -;
+
 cat /dev/null > "${PG_DATA}/wasrun";
 chown postgres:postgres "${PG_DATA}/wasrun";
-chmod 755 "${PG_DATA}/wasrun";
+chmod a+rw "${PG_DATA}/wasrun";
+
+su postgres;
+
+#cat "none" > "${PG_DATA}/wasrun";
+#touch "${PG_DATA}/wasrun";
+#chmod 777 "${PG_DATA}/wasrun";
 
 service postgresql stop;
 
