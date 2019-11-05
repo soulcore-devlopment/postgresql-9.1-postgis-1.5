@@ -13,7 +13,7 @@ set -e
 
 #if [ ! -s "$PG_DATA" ]; then
 
-if [ ! $(ls -a "${PG_DATA}/wasrun") ]; then
+if [ ! $(ls -a "$PG_DATA/wasrun") ]; then
 
 service postgresql start;
 
@@ -38,9 +38,9 @@ psql -v ON_ERROR_STOP=1 --username $POSTGRES_USER --dbname $POSTGRES_DB <<-'EOSQ
     UPDATE pg_database SET datistemplate=true WHERE datname='template_postgis';
 EOSQL
 
-cat /dev/null > "${PG_DATA}/wasrun";
-chown postgres:postgres "${PG_DATA}/wasrun";
-chmod a+rw "${PG_DATA}/wasrun";
+cat /dev/null > "$PG_DATA/wasrun";
+chown postgres:postgres "$PG_DATA/wasrun";
+chmod 775 "$PG_DATA/wasrun";
 
 #cat "none" > "${PG_DATA}/wasrun";
 #touch "${PG_DATA}/wasrun";
