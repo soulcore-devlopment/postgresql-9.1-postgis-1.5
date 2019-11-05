@@ -18,7 +18,9 @@ ENV POSTGRES_PASSWORD=postgres
 #ADD docker-entrypoint.sh /docker-entrypoint.sh
 #RUN chmod -v +x /docker-entrypoint.sh
 RUN mkdir -p "$PG_DATA"
-RUN chmod 775 "$PG_DATA"
+RUN chmod 775 -R "$PG_DATA"
+RUN chown postgres:postgres "$PG_DATA"
+
 ADD docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod 775 /docker-entrypoint.sh
 #RUN chmod -v +x /docker-entrypoint.sh

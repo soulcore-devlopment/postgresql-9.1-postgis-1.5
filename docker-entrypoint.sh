@@ -38,13 +38,9 @@ psql -v ON_ERROR_STOP=1 --username $POSTGRES_USER --dbname $POSTGRES_DB <<-'EOSQ
     UPDATE pg_database SET datistemplate=true WHERE datname='template_postgis';
 EOSQL
 
-su -;
-
 cat /dev/null > "${PG_DATA}/wasrun";
 chown postgres:postgres "${PG_DATA}/wasrun";
 chmod a+rw "${PG_DATA}/wasrun";
-
-su postgres;
 
 #cat "none" > "${PG_DATA}/wasrun";
 #touch "${PG_DATA}/wasrun";
