@@ -1,0 +1,68 @@
+
+
+
+/usr/lib/postgresql/$PG_VERSION/bin
+
+
+pg_ctl is a utility to initialize, start, stop, or control a PostgreSQL server.
+
+Usage:
+  pg_ctl init[db]               [-D DATADIR] [-s] [-o "OPTIONS"]
+  pg_ctl start   [-w] [-t SECS] [-D DATADIR] [-s] [-l FILENAME] [-o "OPTIONS"]
+  pg_ctl stop    [-W] [-t SECS] [-D DATADIR] [-s] [-m SHUTDOWN-MODE]
+  pg_ctl restart [-w] [-t SECS] [-D DATADIR] [-s] [-m SHUTDOWN-MODE]
+                 [-o "OPTIONS"]
+  pg_ctl reload  [-D DATADIR] [-s]
+  pg_ctl status  [-D DATADIR]
+  pg_ctl promote [-D DATADIR] [-s]
+  pg_ctl kill    SIGNALNAME PID
+
+Common options:
+  -D, --pgdata DATADIR   location of the database storage area
+  -s, --silent           only print errors, /usr/lib/postgresql no informational messages
+  -t SECS                seconds to wait when using -w option
+  -w                     wait until operation completes
+  -W                     do not wait until operation completes
+  --help                 show this help, then exit
+  --version              output version information, then exit
+(The default is to wait for shutdown, but not for start or restart.)
+
+If the -D option is omitted, the environment variable PGDATA is used.
+
+Options for start or restart:
+  -c, --core-files       allow postgres to produce core files
+  -l, --log FILENAME     write (or append) server log to FILENAME
+  -o OPTIONS             command line options to pass to postgres
+                         (PostgreSQL server executable) or initdb
+  -p PATH-TO-POSTGRES    normally not necessary
+
+Options for stop or restart:
+  -m SHUTDOWN-MODE   can be "smart", "fast", or "immediate"
+
+Shutdown modes are:
+  smart       quit after all clients have disconnected
+  fast        quit directly, with proper shutdown
+  immediate   quit without complete shutdown; will lead to recovery on restart
+
+Allowed signal names for kill:
+  HUP INT QUIT ABRT TERM USR1 USR2
+
+Report bugs to <pgsql-bugs@postgresql.org>.
+
+
+
+
+
+
+/usr/lib/postgresql/$PG_VERSION/bin/
+
+Just create the database using createdb CLI tool:
+
+PGHOST="my.database.domain.com"
+PGUSER="postgres"
+PGDB="mydb"
+createdb -h $PGHOST -p $PGPORT -U $PGUSER $PGDB
+If the database exists, it will return an error:
+
+createdb: database creation failed: ERROR:  database "mydb" already exists
+

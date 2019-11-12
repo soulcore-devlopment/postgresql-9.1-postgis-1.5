@@ -10,7 +10,7 @@
 
 #su postgres;
 
-#if [ `$(psql -v ON_ERROR_STOP=1 --username $POSTGRES_USER --dbname $POSTGRES_DB -c "SELECT 1 as "exist" from pg_database WHERE datname = 'template_postgis';" | grep -q 1) != 1` ]; then
+#if [ `$(/usr/lib/postgresql/$PG_VERSION/bin/psql -v ON_ERROR_STOP=1 --username $POSTGRES_USER --dbname $POSTGRES_DB -c "SELECT 1 as "exist" from pg_database WHERE datname = 'template_postgis';" | grep -q 1) != 1` ]; then
 #fi
 
 
@@ -42,32 +42,40 @@ if [ ! $(ls -a ${PG_RUN}) ]; then
    
     echo "(no):${PG_RUN}"
 
-    echo "(staing postgres)"
-    service postgresql start
+    echo "(starting postgres)"
 
-    echo "(alter role)"
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+    #service postgresql start
+    #/usr/lib/postgresql/$PG_VERSION/bin/pg_ctl initdb --pgdata $PG_DATA -w
+    #--silent
+    /usr/lib/postgresql/$PG_VERSION/bin/pg_ctl start --pgdata $PG_DATA -w -o "'--config-file=/etc/postgresql/${PG_VERSION}/main/postgresql.conf'";
+
+    #/usr/lib/postgresql/$PG_VERSION/bin/pg_ctl initdb --pgdata $PG_DATA && \
+    #/usr/lib/postgresql/$PG_VERSION/bin/postgres -D $PG_DATA -c config_file="/etc/postgresql/$PG_VERSION/main/postgresql.conf";
+    
+    echo "(alter role)" #--username "$POSTGRES_USER"
+    /usr/lib/postgresql/$PG_VERSION/bin/psql -v ON_ERROR_STOP=1 --dbname "$POSTGRES_DB" <<-EOSQL
     ALTER ROLE $POSTGRES_USER PASSWORD '$POSTGRES_PASSWORD';
 EOSQL
 
     echo "(create template_postgis)"
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-'EOSQL'
-    CREATE DATABASE template_postgis TEMPLATE template0;
+    /usr/lib/postgresql/$PG_VERSION/bin/psql -v ON_ERROR_STOP=1 --dbname "$POSTGRES_DB" <<-'EOSQL'
+    CREATE DATABASE template_postgis WITH        
+        TEMPLATE = template0
+        ENCODING = 'UTF8';
 EOSQL
-
     echo "(add extensions)"
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" template_postgis <<-'EOSQL'
+    /usr/lib/postgresql/$PG_VERSION/bin/psql -v ON_ERROR_STOP=1 template_postgis <<-'EOSQL'
     CREATE EXTENSION plpythonu;
     CREATE EXTENSION "uuid-ossp";
     CREATE EXTENSION fuzzystrmatch;
 EOSQL
 
     echo "(run postgis files)"
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" template_postgis -f /usr/share/postgresql/${PG_VERSION}/contrib/postgis-$POSTGIS_VERSION/postgis.sql #>/dev/null;
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" template_postgis -f /usr/share/postgresql/${PG_VERSION}/contrib/postgis-$POSTGIS_VERSION/spatial_ref_sys.sql #>/dev/null
-
+    /usr/lib/postgresql/$PG_VERSION/bin/psql -v ON_ERROR_STOP=1 template_postgis -f /usr/share/postgresql/${PG_VERSION}/contrib/postgis-$POSTGIS_VERSION/postgis.sql; #>/dev/null;
+    /usr/lib/postgresql/$PG_VERSION/bin/psql -v ON_ERROR_STOP=1 template_postgis -f /usr/share/postgresql/${PG_VERSION}/contrib/postgis-$POSTGIS_VERSION/spatial_ref_sys.sql; #>/dev/null
+    
     echo "(set database as template)";
-    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-'EOSQL'
+    /usr/lib/postgresql/$PG_VERSION/bin/psql -v ON_ERROR_STOP=1 --dbname "$POSTGRES_DB" <<-'EOSQL'
     UPDATE pg_database SET datistemplate=true WHERE datname='template_postgis';
 EOSQL
 
@@ -75,16 +83,20 @@ EOSQL
     #touch "${PG_DATA}/wasrun";
     #chmod 777 "${PG_DATA}/wasrun";
 
-    cat /dev/null > "${PG_RUN}"
+    cat /dev/null > "${PG_RUN}";
     echo "(created): ${PG_RUN}"
     #chown postgres:postgres "${PG_DATA}/wasrun";
     #chmod a+rwx "${PG_DATA}/wasrun";
 
     echo "stop service ..."
-    service postgresql stop
-    
+    #service postgresql stop 
+    #--silent
+    /usr/lib/postgresql/$PG_VERSION/bin/pg_ctl stop --pgdata $PG_DATA -w;
+    #kill -INT `head -1 $PG_DATA/postmaster.pid`
+    #kill -TERM `head -1 $PG_DATA/postmaster.pid`;
+
     echo "xxxxx"
-    exec "$@"
+    exec "$@";
     
     #cat /dev/null > "$PG_DATA/wasrun";
     #chown postgres:postgres "$PG_DATA/wasrun";
@@ -92,10 +104,10 @@ EOSQL
 
 fi
 
-exec "$@"
+exec "$@";
 
 # the eosql need a identation (tab)
-#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-'EOSQL'
+#/usr/lib/postgresql/$PG_VERSION/bin/psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-'EOSQL'
 #DO $$DECLARE r record;
 #BEGIN
 #    FOR r IN SELECT table_schema, table_name FROM information_schema.tables

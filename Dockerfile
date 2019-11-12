@@ -26,12 +26,14 @@ RUN echo "listen_addresses='*'" >> /etc/postgresql/$PG_VERSION/main/postgresql.c
 #RUN mkdir -p "$PG_DATA"
 #RUN chmod 777 -R "$PG_DATA"
 #RUN chown -v postgres:postgres "$PG_DATA"
-	
-RUN mkdir -p "$PG_DATA" && \
-    chown -R postgres:postgres "$PG_DATA" && \
-    chmod 700 "$PG_DATA" # this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
 
-VOLUME $PG_DATA
+RUN mkdir -p $PG_DATA && \
+    chown -R postgres:postgres $PG_DATA && \
+    chmod -R 700 $PG_DATA
+
+# this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
+
+#VOLUME $PG_DATA
 #VOLUME [/var/lib/postgresql/data]
 
 #ADD docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
@@ -42,8 +44,15 @@ RUN chmod -v a+x /docker-entrypoint.sh
 EXPOSE 5432/tcp
 
 USER postgres
+
 ENTRYPOINT [ "/bin/bash", "/docker-entrypoint.sh" ]
+
 #CMD [ "/bin/sh", "service postgresql start" ]
 #CMD [ "/bin/bash", "-c", "service postgresql start" ]
 #CMD ["postgres"]
+#USER postgres
+#CMD [ "/bin/bash", "-c", "/usr/lib/postgresql/$PG_VERSION/bin/postgres -D $PG_DATA -c config_file=\"/etc/postgresql/$PG_VERSION/main/postgresql.conf\"" ]
+
 CMD [ "/bin/bash", "-c", "/usr/lib/postgresql/$PG_VERSION/bin/postgres -D $PG_DATA -c config_file=\"/etc/postgresql/$PG_VERSION/main/postgresql.conf\"" ]
+
+
