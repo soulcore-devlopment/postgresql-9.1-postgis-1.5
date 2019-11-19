@@ -59,7 +59,7 @@ EOSQL
 
     echo "(create template_postgis)"
     /usr/lib/postgresql/$PG_VERSION/bin/psql -v ON_ERROR_STOP=1 --dbname "$POSTGRES_DB" <<-'EOSQL'
-    CREATE DATABASE template_postgis WITH        
+    CREATE DATABASE template_postgis WITH
         TEMPLATE = template0
         ENCODING = 'UTF8';
 EOSQL

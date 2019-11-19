@@ -19,6 +19,25 @@ RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PG_VERSION/main/p
 RUN echo "data_directory = '${PG_DATA}'" >> /etc/postgresql/$PG_VERSION/main/postgresql.conf
 RUN echo "listen_addresses='*'" >> /etc/postgresql/$PG_VERSION/main/postgresql.conf
 
+RUN chown -R postgres:postgres /etc/postgresql && \
+    chmod -R 775 /etc/postgresql
+
+RUN cp /etc/ssl/certs/ssl-cert-snakeoil.pem $PG_DATA/server_.crt
+RUN cp /etc/ssl/private/ssl-cert-snakeoil.key $PG_DATA/server_.key
+
+RUN rm $PG_DATA/server.crt
+RUN rm $PG_DATA/server.key
+
+RUN mv $PG_DATA/server_.crt $PG_DATA/server.crt
+RUN mv $PG_DATA/server_.key $PG_DATA/server.key
+
+RUN mkdir -p /run/postgresql && \
+    chown -R postgres:postgres /run/postgresql && \
+    chmod -R 775 /run/postgresql
+
+#lrwxrwxrwx 1 postfix input   36 Nov 11 22:59 server.crt -> /etc/ssl/certs/ssl-cert-snakeoil.pem
+#lrwxrwxrwx 1 postfix input   38 Nov 11 22:59 server.key -> /etc/ssl/private/ssl-cert-snakeoil.key
+
 #RUN mkdir -p $PG_BASE
 #RUN chmod 700 -R $PG_BASE
 #RUN chown -v postgres:postgres $PG_BASE
