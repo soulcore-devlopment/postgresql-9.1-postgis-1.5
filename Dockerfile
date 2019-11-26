@@ -35,6 +35,10 @@ RUN mkdir -p /run/postgresql && \
     chown -R postgres:postgres /run/postgresql && \
     chmod -R 775 /run/postgresql
 
+RUN mkdir -p /var/run/postgresql && \
+    chown -R postgres:postgres /var/run/postgresql && \
+    chmod -R 775 /var/run/postgresql
+
 #lrwxrwxrwx 1 postfix input   36 Nov 11 22:59 server.crt -> /etc/ssl/certs/ssl-cert-snakeoil.pem
 #lrwxrwxrwx 1 postfix input   38 Nov 11 22:59 server.key -> /etc/ssl/private/ssl-cert-snakeoil.key
 
